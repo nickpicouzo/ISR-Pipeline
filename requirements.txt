@@ -1,0 +1,17 @@
+# PyTorch is installed separately — see setup.md for machine-specific commands
+
+# YOLO11
+ultralytics>=8.3.0
+
+# Tracking
+deep-sort-realtime>=1.3.2
+
+# Video / image processing
+opencv-python>=4.9.0
+
+# Data
+numpy>=1.26.0
+pandas>=2.2.0
+
+# Visualization
+matplotlib>=3.8.0

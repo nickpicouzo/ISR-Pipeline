@@ -1,0 +1,29 @@
+# Virtual environment
+venv/
+
+# Python bytecode
+__pycache__/
+*.pyc
+*.pyo
+
+# Drone footage (too large for GitHub)
+*.MP4
+*.mp4
+*.SRT
+*.srt
+
+# Model weights (too large for GitHub)
+*.pt
+*.pth
+
+# Output videos (too large for GitHub)
+outputs/annotated_video/*.mp4
+
+# Jupyter notebooks checkpoints
+.ipynb_checkpoints/
+
+# Mac junk
+.DS_Store
+
+# Windows junk
+Thumbs.db
