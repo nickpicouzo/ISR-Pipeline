@@ -1,8 +1,10 @@
 # Environment Setup
 
-## 1. Install Python 3.11
+## 1. Install Python 3.14
 Download from https://www.python.org/downloads/
 Make sure to check "Add Python to PATH" during install.
+
+> **Note:** If any package fails to install, Python 3.11 or 3.12 are stable fallback options.
 
 ## 2. Create a virtual environment
 ```bash
@@ -15,12 +17,12 @@ Activate it:
 
 ## 3. Install PyTorch (machine-specific)
 
-**RTX 4050 (CUDA 12.1):**
+**David — Surface Studio (RTX 4050, CUDA 12.1):**
 ```bash
 pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
 ```
 
-**RTX 5070 (CUDA 12.8):**
+**Nick — Legion Pro (RTX 5070, CUDA 12.8):**
 ```bash
 pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu128
 ```
