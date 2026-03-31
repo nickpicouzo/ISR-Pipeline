@@ -1,10 +1,8 @@
 # Environment Setup
 
-## 1. Install Python 3.14
+## 1. Install Python 3.12
 Download from https://www.python.org/downloads/
 Make sure to check "Add Python to PATH" during install.
-
-> **Note:** If any package fails to install, Python 3.11 or 3.12 are stable fallback options.
 
 ## 2. Create a virtual environment
 ```bash
