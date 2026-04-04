@@ -1,15 +1,33 @@
 import cv2
 import sys
+import os
 from tracker import VehicleTracker
 
 
-def test(video_path):
+def test(video_path, save_output):
     tracker = VehicleTracker()
     cap = cv2.VideoCapture(video_path)
 
     if not cap.isOpened():
         print(f"Error: could not open video at {video_path}")
         sys.exit(1)
+
+    writer = None
+    if save_output:
+        width  = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+        height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+        fps    = cap.get(cv2.CAP_PROP_FPS)
+        output_path = os.path.join(
+            os.path.dirname(__file__),
+            "..", "outputs", "annotated_video", "test_output.mp4"
+        )
+        writer = cv2.VideoWriter(
+            output_path,
+            cv2.VideoWriter_fourcc(*"mp4v"),
+            fps,
+            (width, height),
+        )
+        print(f"Recording to: {os.path.abspath(output_path)}")
 
     frame_count = 0
 
@@ -38,6 +56,9 @@ def test(video_path):
                 2,
             )
 
+        if writer:
+            writer.write(frame)
+
         cv2.imshow("Tracker Test", frame)
         print(f"Frame {frame_count}: {len(tracks)} active tracks")
 
@@ -46,6 +67,9 @@ def test(video_path):
             break
 
     cap.release()
+    if writer:
+        writer.release()
+        print("Output saved.")
     cv2.destroyAllWindows()
 
 
@@ -54,4 +78,7 @@ if __name__ == "__main__":
         print("Usage: python test_tracker.py <path_to_video>")
         sys.exit(1)
 
-    test(sys.argv[1])
+    answer = input("Save annotated output video? (y/n): ").strip().lower()
+    save_output = answer == "y"
+
+    test(sys.argv[1], save_output)
