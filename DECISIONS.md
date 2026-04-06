@@ -97,11 +97,4 @@ Then open a Pull Request on GitHub from your branch into `main`. Tag a teammate 
 | `src/pipeline.py` | David + Nick | Coordinate before both editing |
 | `DECISIONS.md` | Everyone | Edit different sections, no overlap |
 
----
 
-## What is mAP, Precision, and Recall?
-*Author: Dylan de Verteuil*
-
-<!-- Dylan fills this in during Week 2 -->
-
----
