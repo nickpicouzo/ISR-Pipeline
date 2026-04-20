@@ -59,7 +59,8 @@ def test(video_path, save_output):
         if writer:
             writer.write(frame)
 
-        cv2.imshow("Tracker Test", frame)
+        display = cv2.resize(frame, (1280, 720))
+        cv2.imshow("Tracker Test", display)
         print(f"Frame {frame_count}: {len(tracks)} active tracks")
 
         # Press Q to quit
