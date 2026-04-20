@@ -1,5 +1,5 @@
 import math
-from src.srt_parser import SRTFrame
+from srt_parser import SRTFrame
 
 HFOV_DEG = 84.0  # DJI Mini 5 Pro horizontal FOV
 
