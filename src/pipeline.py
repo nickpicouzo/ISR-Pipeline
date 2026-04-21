@@ -140,8 +140,8 @@ if __name__ == "__main__":
     parser.add_argument("srt", help="Path to matching .SRT telemetry file")
     parser.add_argument("--zones", default=os.path.join(os.path.dirname(__file__), "zones.json"),
                         help="Path to zones.json (default: src/zones.json)")
-    parser.add_argument("--model", default="../models/yolo11s.pt",
-                        help="Path to YOLO model weights (default: ../models/yolo11s.pt)")
+    parser.add_argument("--model", default="../models/best.pt",
+                        help="Path to YOLO model weights (default: ../models/best.pt)")
     args = parser.parse_args()
 
     run(args.video, args.srt, args.zones, args.model)
