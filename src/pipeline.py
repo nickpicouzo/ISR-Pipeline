@@ -94,8 +94,20 @@ def run(video_path, srt_path, zones_path, model_path):
 
     # Output paths
     base_dir = os.path.dirname(__file__)
-    video_out_path = os.path.join(base_dir, "..", "outputs", "annotated_video", "pipeline_output.mp4")
-    csv_out_path = os.path.join(base_dir, "..", "outputs", "csv_logs", "speed_log.csv")
+    video_dir = os.path.join(base_dir, "..", "outputs", "annotated_video")
+    csv_dir = os.path.join(base_dir, "..", "outputs", "csv_logs")
+
+    session = input("Which session is this footage from? (1 or 2): ").strip()
+    while session not in ("1", "2"):
+        session = input("Please enter 1 or 2: ").strip()
+    session_tag = f"session{session}"
+
+    trial = 1
+    while os.path.exists(os.path.join(csv_dir, f"speed_log_{session_tag}_{trial}.csv")):
+        trial += 1
+
+    video_out_path = os.path.join(video_dir, f"pipeline_output_{session_tag}_{trial}.mp4")
+    csv_out_path = os.path.join(csv_dir, f"speed_log_{session_tag}_{trial}.csv")
 
     writer = cv2.VideoWriter(
         video_out_path,
@@ -152,11 +164,11 @@ def run(video_path, srt_path, zones_path, model_path):
                 total_displacement[track_id] = total_displacement.get(track_id, 0) + displacement
                 raw_speed = estimate_speed(displacement, width, telemetry)
                 history = speed_history.setdefault(track_id, [])
-                history.append(raw_speed["mph"])
+                history.append(raw_speed["m_per_s"])
                 if len(history) > SPEED_WINDOW:
                     history.pop(0)
-                avg_mph = sum(history) / len(history)
-                speed = {"m_per_s": raw_speed["m_per_s"], "mph": round(avg_mph, 1)}
+                avg_mps = sum(history) / len(history)
+                speed = {"m_per_s": round(avg_mps, 3), "mph": round(avg_mps * 2.23694, 1)}
             speeds[track_id] = speed
             prev_bboxes[track_id] = bbox
 

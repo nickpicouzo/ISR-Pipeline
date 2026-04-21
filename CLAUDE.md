@@ -9,7 +9,7 @@ Aerial vehicle detection and speed estimation system using DJI drone footage of 
 - **Dylan** (ML Lead) — Roboflow labeling, YOLO11 fine-tuning, evaluation metrics
 
 ## Machines
-- **David** — Surface Studio, RTX 4050, CUDA 12.1, Python 3.12
+- **David** — Surface Studio, RTX 4050, CUDA 12.1, Python 3.14
 - **Nick** — Legion Pro, RTX 5070, CUDA 12.8, Python 3.12
 
 ## Environment Setup
