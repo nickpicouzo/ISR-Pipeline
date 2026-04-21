@@ -26,6 +26,35 @@ def get_centroid(bbox):
     return (x1 + x2) / 2, (y1 + y2) / 2
 
 
+def iou(bbox1, bbox2):
+    x1 = max(bbox1[0], bbox2[0])
+    y1 = max(bbox1[1], bbox2[1])
+    x2 = min(bbox1[2], bbox2[2])
+    y2 = min(bbox1[3], bbox2[3])
+    inter = max(0, x2 - x1) * max(0, y2 - y1)
+    a1 = (bbox1[2] - bbox1[0]) * (bbox1[3] - bbox1[1])
+    a2 = (bbox2[2] - bbox2[0]) * (bbox2[3] - bbox2[1])
+    union = a1 + a2 - inter
+    return inter / union if union > 0 else 0
+
+
+def deduplicate_tracks(tracks, max_centroid_dist=80):
+    """Remove duplicate tracks whose centroids are within max_centroid_dist pixels — keep the older (lower) track ID."""
+    tracks = sorted(tracks, key=lambda t: t["track_id"])
+    keep = []
+    for t in tracks:
+        cx, cy = get_centroid(t["bbox"])
+        duplicate = False
+        for k in keep:
+            kx, ky = get_centroid(k["bbox"])
+            if ((cx - kx) ** 2 + (cy - ky) ** 2) ** 0.5 < max_centroid_dist:
+                duplicate = True
+                break
+        if not duplicate:
+            keep.append(t)
+    return keep
+
+
 def draw_overlay(frame, tracks, speeds, zone_tracker):
     for t in tracks:
         x1, y1, x2, y2 = [int(v) for v in t["bbox"]]
@@ -35,13 +64,14 @@ def draw_overlay(frame, tracks, speeds, zone_tracker):
         mph = speed.get("mph", 0.0)
 
         in_zone = zone_tracker.in_any_zone(track_id)
-        color = (0, 0, 255) if in_zone else (0, 255, 0)
+        box_color = (0, 0, 255) if in_zone else (0, 255, 0)
+        text_color = (0, 0, 255) if in_zone else (0, 0, 0)
 
-        cv2.rectangle(frame, (x1, y1), (x2, y2), color, 2)
+        cv2.rectangle(frame, (x1, y1), (x2, y2), box_color, 2)
 
         label = f"ID {track_id} {class_name} {mph:.1f}mph"
-        cv2.putText(frame, label, (x1, y1 - 8),
-                    cv2.FONT_HERSHEY_SIMPLEX, 0.55, color, 2)
+        cv2.putText(frame, label, (x1, y1 - 12),
+                    cv2.FONT_HERSHEY_SIMPLEX, 1.2, text_color, 3)
 
     return frame
 
@@ -82,9 +112,13 @@ def run(video_path, srt_path, zones_path, model_path):
     print(f"Output video: {os.path.abspath(video_out_path)}")
     print(f"Output CSV:   {os.path.abspath(csv_out_path)}")
 
-    prev_bboxes = {}  # track_id -> bbox from previous frame
-    speeds = {}       # track_id -> latest speed dict
+    prev_bboxes = {}         # track_id -> bbox from previous frame
+    speeds = {}              # track_id -> latest smoothed speed dict
+    speed_history = {}       # track_id -> list of recent raw speeds
+    total_displacement = {}  # track_id -> cumulative pixel displacement
     frame_num = 0
+    MIN_DISPLACEMENT = 30    # pixels — tracks that never move this much are filtered out
+    SPEED_WINDOW = 7         # frames to average speed over
 
     while True:
         ret, frame = cap.read()
@@ -93,7 +127,17 @@ def run(video_path, srt_path, zones_path, model_path):
 
         frame_num += 1
         telemetry = get_frame_telemetry(srt_frames, frame_num)
-        tracks = tracker.update(frame)
+
+        # Downscale for faster inference, then scale boxes back up
+        small = cv2.resize(frame, (1280, 720))
+        scale_x = width / 1280
+        scale_y = height / 720
+        tracks_small = tracker.update(small)
+        tracks = []
+        for t in tracks_small:
+            x1, y1, x2, y2 = t["bbox"]
+            t["bbox"] = [x1 * scale_x, y1 * scale_y, x2 * scale_x, y2 * scale_y]
+            tracks.append(t)
 
         for t in tracks:
             track_id = t["track_id"]
@@ -101,13 +145,24 @@ def run(video_path, srt_path, zones_path, model_path):
             class_name = t["class_name"]
             cx, cy = get_centroid(bbox)
 
-            # Speed estimation
+            # Speed estimation with rolling average
             speed = {"m_per_s": 0.0, "mph": 0.0}
             if track_id in prev_bboxes and telemetry:
                 displacement = centroid_displacement(prev_bboxes[track_id], bbox)
-                speed = estimate_speed(displacement, width, telemetry)
+                total_displacement[track_id] = total_displacement.get(track_id, 0) + displacement
+                raw_speed = estimate_speed(displacement, width, telemetry)
+                history = speed_history.setdefault(track_id, [])
+                history.append(raw_speed["mph"])
+                if len(history) > SPEED_WINDOW:
+                    history.pop(0)
+                avg_mph = sum(history) / len(history)
+                speed = {"m_per_s": raw_speed["m_per_s"], "mph": round(avg_mph, 1)}
             speeds[track_id] = speed
             prev_bboxes[track_id] = bbox
+
+            # Skip static false positives
+            if total_displacement.get(track_id, 0) < MIN_DISPLACEMENT:
+                continue
 
             # Zone detection
             zone_events = zone_tracker.update(track_id, cx, cy, frame_num) if zones else []
@@ -117,7 +172,9 @@ def run(video_path, srt_path, zones_path, model_path):
             csv_writer.writerow([frame_num, track_id, class_name,
                                   speed["mph"], speed["m_per_s"], event_str])
 
-        frame = draw_overlay(frame, tracks, speeds, zone_tracker)
+        active_tracks = [t for t in tracks if total_displacement.get(t["track_id"], 0) >= MIN_DISPLACEMENT]
+        active_tracks = deduplicate_tracks(active_tracks)
+        frame = draw_overlay(frame, active_tracks, speeds, zone_tracker)
         writer.write(frame)
 
         display = cv2.resize(frame, (1280, 720))

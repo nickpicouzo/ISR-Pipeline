@@ -3,7 +3,7 @@ from ultralytics import YOLO
 
 
 class VehicleTracker:
-    def __init__(self, model_path="../models/best.pt", max_age=90, min_hits=2, conf=0.55):
+    def __init__(self, model_path="../models/best.pt", max_age=15, min_hits=1, conf=0.55):
         """
         model_path : path to YOLO11 model weights
         max_age    : frames to keep a track alive without a matching detection
@@ -24,7 +24,7 @@ class VehicleTracker:
         Run YOLO11 on a frame and return detections in DeepSORT format.
         Each detection: ([left, top, width, height], confidence, class_name)
         """
-        results = self.model(frame, verbose=False, conf=self.conf, iou=0.7)[0]
+        results = self.model(frame, verbose=False, conf=self.conf, iou=0.7, agnostic_nms=True)[0]
         detections = []
 
         for box in results.boxes:

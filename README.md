@@ -3,7 +3,7 @@ Aerial vehicle detection, tracking, and speed estimation using DJI drone footage
 
 ## Overview
 Nadir drone footage is processed through a three-stage pipeline:
-1. **Detection** — YOLO11 detects vehicles (car, truck, bus, motorcycle) in each frame
+1. **Detection** — YOLO11 (fine-tuned on VisDrone) detects vehicles (car, truck) in each frame
 2. **Tracking** — DeepSORT assigns persistent IDs to each vehicle across frames using a Kalman filter
 3. **Speed Estimation** — Vehicle speed is calculated in m/s using pixel displacement and drone altitude from SRT telemetry
 

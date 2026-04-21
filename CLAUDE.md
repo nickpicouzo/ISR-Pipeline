@@ -28,7 +28,7 @@ See `setup.md` for full machine-specific PyTorch install commands.
 
 ## Repo Structure
 - `footage/` — raw .MP4 and .SRT drone files, split by session
-- `frames/` — extracted frames for Roboflow labeling, split by session and position
+- `frames/` — extracted frames for Roboflow labeling, split by session
 - `labels/` — Roboflow exported annotation files
 - `models/` — YOLO11 .pt weight files (gitignored)
 - `outputs/annotated_video/` — final annotated .mp4 output
