@@ -97,4 +97,51 @@ Then open a Pull Request on GitHub from your branch into `main`. Tag a teammate 
 | `src/pipeline.py` | David + Nick | Coordinate before both editing |
 | `DECISIONS.md` | Everyone | Edit different sections, no overlap |
 
+---
+
+## Running the Pipeline
+*Author: David Gleason*
+
+### Step 1 — Define Zone Logic (run once per video)
+
+```bash
+cd src
+python zone_picker.py "path\to\video.MP4"
+```
+
+Controls:
+- **Left-click** — add a point to the zone polygon
+- **Enter** — finish the current zone
+- **N** — discard current points, start a new zone
+- **Right-click** — undo last point
+- **S** — save zones to file
+- **Q** — quit
+
+To save zones under a specific name (recommended per video):
+```bash
+python zone_picker.py "path\to\video.MP4" 30 "zones_session1.json"
+```
+
+---
+
+### Step 2 — Run the Full Pipeline
+
+```bash
+cd src
+python pipeline.py "path\to\video.MP4" "path\to\video.SRT"
+```
+
+With a custom zones file or model:
+```bash
+python pipeline.py "path\to\video.MP4" "path\to\video.SRT" --zones "zones_session1.json" --model "../models/best_visdrone.pt"
+```
+
+Outputs:
+- Annotated video → `outputs/annotated_video/pipeline_output.mp4`
+- Speed + zone CSV → `outputs/csv_logs/speed_log.csv`
+
+Overlay colors:
+- **Green** box — vehicle outside all zones
+- **Red** box — vehicle inside a zone
+
 
