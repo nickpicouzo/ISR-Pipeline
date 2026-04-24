@@ -27,6 +27,9 @@ src/zones_*.json
 # Jupyter notebooks checkpoints
 .ipynb_checkpoints/
 
+# Claude AI instructions
+CLAUDE.md
+
 # Mac junk
 .DS_Store
 
