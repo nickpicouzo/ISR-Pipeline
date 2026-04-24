@@ -1,5 +1,6 @@
 # Virtual environment
 venv/
+venv312/
 
 # Python bytecode
 __pycache__/
@@ -18,6 +19,10 @@ __pycache__/
 
 # Output videos (too large for GitHub)
 outputs/annotated_video/*.mp4
+
+# Zone files (footage-specific, not shared)
+src/zones.json
+src/zones_*.json
 
 # Jupyter notebooks checkpoints
 .ipynb_checkpoints/
